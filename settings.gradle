@@ -1,3 +1,0 @@
-include ':imsdk'
-include ':app'
-rootProject.name = "imimsdk"
