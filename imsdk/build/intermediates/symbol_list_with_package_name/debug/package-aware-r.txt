@@ -1,3 +1,0 @@
-com.beetle.im
-drawable ic_launcher
-string app_name
