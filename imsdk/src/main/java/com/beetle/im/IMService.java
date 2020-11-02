@@ -949,7 +949,7 @@ public class IMService {
             this.sendMessage(m);
         }
 
-        this.tcp.startRead();
+        
     }
 
     private void connect() {
