@@ -326,7 +326,7 @@ public class IMService {
     }
 
     public void enterBackground() {
-        runOnThread(looper, new Runnable() {
+        runOnWorkThread(new Runnable() {
             @Override
             public void run() {
                 IMService.this._enterBackground();
@@ -348,7 +348,7 @@ public class IMService {
     }
 
     public void enterForeground() {
-        runOnThread(looper, new Runnable() {
+        runOnWorkThread(new Runnable() {
             @Override
             public void run() {
                 IMService.this._enterForeground();
@@ -491,7 +491,7 @@ public class IMService {
     }
 
     public void start() {
-        runOnThread(looper, new Runnable() {
+        runOnWorkThread(new Runnable() {
             @Override
             public void run() {
                 IMService.this._start();
@@ -520,7 +520,7 @@ public class IMService {
     }
 
     public void stop() {
-        runOnThread(looper, new Runnable() {
+        runOnWorkThread(new Runnable() {
             @Override
             public void run() {
                 IMService.this._stop();
@@ -777,7 +777,7 @@ public class IMService {
             return;
         }
 
-        runOnThread(looper, new Runnable() {
+        runOnWorkThread(new Runnable() {
             @Override
             public void run() {
                 IMService.this.roomID = roomID;
@@ -790,7 +790,7 @@ public class IMService {
         if (roomID == 0) {
             return;
         }
-        runOnThread(looper, new Runnable() {
+        runOnWorkThread(new Runnable() {
             @Override
             public void run() {
                 if (IMService.this.roomID != roomID) {
@@ -949,7 +949,7 @@ public class IMService {
             this.sendMessage(m);
         }
 
-        
+        this.tcp.startRead();
     }
 
     private void connect() {
@@ -1655,27 +1655,27 @@ public class IMService {
     private void sendHeartbeat() {
         if (connectState == ConnectState.STATE_CONNECTED && this.pingTimestamp == 0) {
             Log.i(TAG, "send ping");
-            //            Message msg = new Message();
-            //            msg.cmd = Command.MSG_PING;
-            //            sendMessage(msg);
-            //
-            //            this.pingTimestamp = now();
+            Message msg = new Message();
+            msg.cmd = Command.MSG_PING;
+            sendMessage(msg);
 
-            //            Timer t = new Timer() {
-            //                @Override
-            //                protected void fire() {
-            //                    int now = now();
-            //                    //3s未收到pong
-            //                    if (pingTimestamp > 0 && now - pingTimestamp >= 3) {
-            //                        Log.i(TAG, "ping timeout");
-            //                        handleClose();
-            //                        return;
-            //                    }
-            //                }
-            //            };
+            this.pingTimestamp = now();
 
-            //t.setTimer(uptimeMillis()+1000*3+100);
-            //t.resume();
+            Timer t = new Timer() {
+                @Override
+                protected void fire() {
+                    int now = now();
+                    //3s未收到pong
+                    if (pingTimestamp > 0 && now - pingTimestamp >= 3) {
+                        Log.i(TAG, "ping timeout");
+                        handleClose();
+                        return;
+                    }
+                }
+            };
+
+            t.setTimer(uptimeMillis()+1000*3+100);
+            t.resume();
         }
     }
 
@@ -1851,14 +1851,18 @@ public class IMService {
     }
 
     private void runOnMainThread(Runnable r) {
-        runOnThread(Looper.getMainLooper(), r);
+        runOnThread(mainThreadHandler, r);
     }
 
-    private void runOnThread(Looper looper, Runnable r) {
-        if (Looper.myLooper() == looper) {
+    private void runOnWorkThread(Runnable r) {
+        runOnThread(handler, r);
+    }
+
+    private void runOnThread(Handler handler, Runnable r) {
+        if (Looper.myLooper() == handler.getLooper()) {
             r.run();
         } else {
-            mainThreadHandler.post(r);
+            handler.post(r);
         }
     }
 
