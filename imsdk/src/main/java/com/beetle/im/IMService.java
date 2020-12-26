@@ -948,7 +948,7 @@ public class IMService {
         for (Message m : messages) {
             this.sendMessage(m);
         }
-
+        if (this.tcp != null)
         this.tcp.startRead();
     }
 
