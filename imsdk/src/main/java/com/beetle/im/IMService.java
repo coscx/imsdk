@@ -1654,28 +1654,28 @@ public class IMService {
 
     private void sendHeartbeat() {
         if (connectState == ConnectState.STATE_CONNECTED && this.pingTimestamp == 0) {
-            Log.i(TAG, "send ping");
-            Message msg = new Message();
-            msg.cmd = Command.MSG_PING;
-            sendMessage(msg);
-
-            this.pingTimestamp = now();
-
-            Timer t = new Timer() {
-                @Override
-                protected void fire() {
-                    int now = now();
-                    //3s未收到pong
-                    if (pingTimestamp > 0 && now - pingTimestamp >= 3) {
-                        Log.i(TAG, "ping timeout");
-                        handleClose();
-                        return;
-                    }
-                }
-            };
-
-            t.setTimer(uptimeMillis()+1000*3+100);
-            t.resume();
+//            Log.i(TAG, "send ping");
+//            Message msg = new Message();
+//            msg.cmd = Command.MSG_PING;
+//            sendMessage(msg);
+//
+//            this.pingTimestamp = now();
+//
+//            Timer t = new Timer() {
+//                @Override
+//                protected void fire() {
+//                    int now = now();
+//                    //3s未收到pong
+//                    if (pingTimestamp > 0 && now - pingTimestamp >= 3) {
+//                        Log.i(TAG, "ping timeout");
+//                        handleClose();
+//                        return;
+//                    }
+//                }
+//            };
+//
+//            t.setTimer(uptimeMillis()+1000*3+100);
+//            t.resume();
         }
     }
 
