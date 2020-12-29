@@ -1692,6 +1692,7 @@ public class IMService {
         byte[] buf = new byte[p.length + 4];
         BytePacket.writeInt32(l, buf, 0);
         System.arraycopy(p, 0, buf, 4, p.length);
+        if (this.tcp != null)
         this.tcp.writeData(buf);
         return true;
     }
