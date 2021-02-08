@@ -1113,7 +1113,7 @@ public class IMService {
         String notification = (String)msg.body;
         Log.d(TAG, "group notification:" + notification);
 
-        if ((msg.flag & Flag.MESSAGE_FLAG_PUSH) != 0) {
+        if ((msg.flag & Flag.MESSAGE_FLAG_PUSH) == 0) {
             ArrayList<IMMessage> array = new ArrayList<IMMessage>();
             IMMessage im = new IMMessage();
             im.content = notification;
