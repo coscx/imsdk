@@ -1026,9 +1026,59 @@ public class IMService {
                 }
             }
         });
-
+        if (this.tcp == null) {
+            return;
+        }
         Log.i(TAG, "tcp connect host ip:" + this.hostIP + " port:" + port);
-        boolean r = this.tcp.connect(this.hostIP, this.port);
+        boolean r = false;
+        try{
+            r = this.tcp.connect(this.hostIP, this.port);
+        }catch (Exception e){
+            Log.i(TAG, "connect exception");
+            if (ENABLE_SSL) {
+                this.tcp = new AsyncSSLTCP();
+            } else {
+                this.tcp = new AsyncTCP();
+            }
+            Log.i(TAG, "new tcp...");
+
+            this.tcp.setConnectCallback(new TCPConnectCallback() {
+                @Override
+                public void onConnect(Object tcp, int status) {
+                    if (status != 0) {
+                        Log.i(TAG, "connect err:" + status);
+                        IMService.this.connectFailCount++;
+                        IMService.this.connectState = ConnectState.STATE_CONNECTFAIL;
+                        IMService.this.publishConnectState();
+                        IMService.this.close();
+                        IMService.this.startConnectTimer();
+                    } else {
+                        IMService.this.onConnected();
+                    }
+                }
+            });
+
+            this.tcp.setReadCallback(new TCPReadCallback() {
+                @Override
+                public void onRead(Object tcp, byte[] data) {
+                    if (data.length == 0) {
+                        Log.i(TAG, "tcp read eof");
+                        IMService.this.connectState = ConnectState.STATE_UNCONNECTED;
+                        IMService.this.publishConnectState();
+                        IMService.this.handleClose();
+                    } else {
+                        IMService.this.pingTimestamp = 0;
+                        boolean b = IMService.this.handleData(data);
+                        if (!b) {
+                            IMService.this.connectState = ConnectState.STATE_UNCONNECTED;
+                            IMService.this.publishConnectState();
+                            IMService.this.handleClose();
+                        }
+                    }
+                }
+            });
+        }
+
         if (!r) {
             Log.i(TAG, "connect failure");
             this.tcp = null;
