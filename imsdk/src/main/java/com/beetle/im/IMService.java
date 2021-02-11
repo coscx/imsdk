@@ -1077,6 +1077,9 @@ public class IMService {
                     }
                 }
             });
+            if (this.tcp != null) {
+               r =true;
+            }
         }
 
         if (!r) {
