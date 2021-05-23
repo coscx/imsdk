@@ -54,5 +54,5 @@ allprojects {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.github.coscx:asynctcp:2.2'
+    implementation 'com.github.coscx:asynctcp:2.3'
 }

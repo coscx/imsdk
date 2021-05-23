@@ -46,7 +46,7 @@ import static android.os.SystemClock.uptimeMillis;
  * Created by houxh on 14-7-21.
  */
 public class IMService {
-    private static final boolean ENABLE_SSL = false;
+    private static final boolean ENABLE_SSL = true;
     private static final String HOST = "imnode2.gobelieve.io";
     private static int PORT;
 
@@ -77,7 +77,7 @@ public class IMService {
     private boolean suspended = true;
     private boolean reachable = true;
     private boolean isBackground = false;
-
+    private Context context;
     private Timer connectTimer;
     private Timer heartbeatTimer;
     private int pingTimestamp;
@@ -165,7 +165,9 @@ public class IMService {
         this.looper = looper;
         this.handler = new Handler(looper);
     }
-
+    public void setContext(Context context) {
+        this.context = context;
+    }
     public Looper getLooper() {
         return looper;
     }
@@ -1032,7 +1034,8 @@ public class IMService {
         Log.i(TAG, "tcp connect host ip:" + this.hostIP + " port:" + port);
         boolean r = false;
         try{
-            r = this.tcp.connect(this.hostIP, this.port);
+            this.tcp.setContext(this.context);
+            r = this.tcp.connect(this.hostIP, this.port,this.context);
         }catch (Exception e){
             Log.i(TAG, "connect exception");
             if (ENABLE_SSL) {
@@ -1127,7 +1130,7 @@ public class IMService {
 
     private void handleIMMessage(Message msg) {
         IMMessage im = (IMMessage)msg.body;
-        Log.d(TAG, "im message sender:" + im.sender + " receiver:" + im.receiver + " content:" + im.content);
+        Log.d(TAG, "im message sender:" + im.sender + " receiver:" + im.receiver + " content:" );
 
         im.isSelf = (msg.flag & Flag.MESSAGE_FLAG_SELF) != 0;
         if (peerMessageHandler != null && !peerMessageHandler.handleMessage(im)) {
@@ -1144,7 +1147,7 @@ public class IMService {
 
     private void handleGroupIMMessage(Message msg) {
         IMMessage im = (IMMessage)msg.body;
-        Log.d(TAG, "group im message sender:" + im.sender + " receiver:" + im.receiver + " content:" + im.content);
+        Log.d(TAG, "group im message sender:" + im.sender + " receiver:" + im.receiver + " content:" );
 
         im.isSelf = (msg.flag & Flag.MESSAGE_FLAG_SELF) != 0;
 
@@ -1164,7 +1167,7 @@ public class IMService {
 
     private void handleGroupNotification(Message msg) {
         String notification = (String)msg.body;
-        Log.d(TAG, "group notification:" + notification);
+        Log.d(TAG, "group notification:" );
 
         if ((msg.flag & Flag.MESSAGE_FLAG_PUSH) == 0) {
             ArrayList<IMMessage> array = new ArrayList<IMMessage>();
