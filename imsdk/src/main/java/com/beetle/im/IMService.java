@@ -134,7 +134,7 @@ public class IMService {
     ArrayList<CustomerMessageObserver> customerServiceMessageObservers = new ArrayList<CustomerMessageObserver>();
     ArrayList<RTMessageObserver> rtMessageObservers = new ArrayList<RTMessageObserver>();
     ArrayList<RoomMessageObserver> roomMessageObservers = new ArrayList<RoomMessageObserver>();
-
+    ArrayList<VOIPObserver> voipObservers = new ArrayList<VOIPObserver>();
     ArrayList<Message> messages = new ArrayList<Message>();//已发出，等待ack的消息
 
     ArrayList<IMMessage> receivedGroupMessages = new ArrayList<IMMessage>();
@@ -315,7 +315,16 @@ public class IMService {
     public void removeRTObserver(RTMessageObserver ob){
         rtMessageObservers.remove(ob);
     }
+    public void pushVOIPObserver(VOIPObserver ob) {
+        if (voipObservers.contains(ob)) {
+            return;
+        }
+        voipObservers.add(ob);
+    }
 
+    public void popVOIPObserver(VOIPObserver ob) {
+        voipObservers.remove(ob);
+    }
     public void addRoomObserver(RoomMessageObserver ob) {
         if (roomMessageObservers.contains(ob)) {
             return;
@@ -1189,7 +1198,16 @@ public class IMService {
 
         sendACK(msg.seq);
     }
+    private void handleVOIPControl(Message msg) {
+        VOIPControl ctl = (VOIPControl)msg.body;
 
+        int count = voipObservers.size();
+        if (count == 0) {
+            return;
+        }
+        VOIPObserver ob = voipObservers.get(count-1);
+        ob.onVOIPControl(ctl);
+    }
     private void handleClose() {
         close();
         startConnectTimer();
@@ -1550,6 +1568,8 @@ public class IMService {
             handleSystemMessage(msg);
         } else if (msg.cmd == Command.MSG_RT) {
             handleRTMessage(msg);
+        } else if (msg.cmd == Command.MSG_VOIP_CONTROL) {
+            handleVOIPControl(msg);
         } else if (msg.cmd == Command.MSG_CUSTOMER) {
             handleCustomerMessage(msg);
         } else if (msg.cmd == Command.MSG_CUSTOMER_SUPPORT) {

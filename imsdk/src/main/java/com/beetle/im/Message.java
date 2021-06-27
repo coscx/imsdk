@@ -57,6 +57,7 @@ class Command{
     public static final int MSG_GROUP_SYNC_KEY = 35;
 
     public static final int MSG_METADATA = 37;
+    public static final int MSG_VOIP_CONTROL = 64;
 }
 
 class Flag {
