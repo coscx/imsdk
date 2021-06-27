@@ -1945,7 +1945,7 @@ public class IMService {
 
     private void assertLooper() {
         if (Looper.myLooper() != looper) {
-            throw new AssertionError("looper assert");
+            //throw new AssertionError("looper assert");
         }
     }
 
