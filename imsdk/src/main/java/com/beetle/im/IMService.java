@@ -1299,17 +1299,7 @@ public class IMService {
         sendACK(msg.seq);
     }
 
-    private void handleCustomerSupportMessage(Message msg) {
-        CustomerMessage cs = (CustomerMessage)msg.body;
-        if (customerMessageHandler != null && !customerMessageHandler.handleCustomerSupportMessage(cs)) {
-            Log.i(TAG, "handle customer service message fail");
-            return;
-        }
 
-        publishCustomerSupportMessage(cs);
-
-        sendACK(msg.seq);
-    }
 
     private void handleRTMessage(Message msg) {
         final RTMessage rt = (RTMessage)msg.body;

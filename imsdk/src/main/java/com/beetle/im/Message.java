@@ -40,8 +40,6 @@ class Command{
     public static final int MSG_ROOM_IM = 20;
     public static final int MSG_SYSTEM = 21;
     public static final int MSG_CUSTOMER_SERVICE = 23;
-    public static final int MSG_CUSTOMER = 24;
-    public static final int MSG_CUSTOMER_SUPPORT = 25;
 
     public static final int MSG_SYNC = 26;
     public static final int MSG_SYNC_BEGIN = 27;
