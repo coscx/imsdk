@@ -694,41 +694,7 @@ public class IMService {
         }
     }
 
-    public void sendCustomerSupportMessageAsync(final CustomerMessage im) {
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                boolean r = IMService.this.sendCustomerSupportMessage(im);
-                if (!r) {
-                    if (customerMessageHandler != null) {
-                        customerMessageHandler.handleMessageFailure(im);
-                    }
-                    publishCustomerServiceMessageFailure(im);
-                }
-            }
-        });
-    }
 
-    public boolean sendCustomerSupportMessage(CustomerMessage im) {
-        assertLooper();
-        Message msg = new Message();
-        msg.cmd = Command.MSG_CUSTOMER_SUPPORT;
-        msg.body = im;
-        if (sendMessage(msg)) {
-            messages.add(msg);
-            //在发送需要回执的消息时尽快发现socket已经断开的情况
-            sendHeartbeat();
-
-            return true;
-        } else if (!suspended) {
-            msg.failCount = 1;
-            messages.add(msg);
-            return true;
-        } else {
-            return false;
-        }
-
-    }
 
     public void sendRTMessageAsync(final RTMessage rt) {
         handler.post(new Runnable() {
@@ -836,7 +802,7 @@ public class IMService {
                     peerMessages.add((IMMessage)m.body);
                 } else if (m.cmd == Command.MSG_GROUP_IM) {
                     groupMessages.add((IMMessage)m.body);
-                } else if (m.cmd == Command.MSG_CUSTOMER || m.cmd == Command.MSG_CUSTOMER_SUPPORT) {
+                } else if (m.cmd == Command.MSG_CUSTOMER) {
                     customerMessages.add((CustomerMessage)m.body);
                 }
             } else {
@@ -1239,7 +1205,7 @@ public class IMService {
             im = (IMMessage)m.body;
         } else if (m.cmd == Command.MSG_GROUP_IM) {
             groupMsg = (IMMessage)m.body;
-        } else if (m.cmd == Command.MSG_CUSTOMER || m.cmd == Command.MSG_CUSTOMER_SUPPORT) {
+        } else if (m.cmd == Command.MSG_CUSTOMER) {
             cm = (CustomerMessage)m.body;
         }
 
@@ -1572,9 +1538,7 @@ public class IMService {
             handleVOIPControl(msg);
         } else if (msg.cmd == Command.MSG_CUSTOMER) {
             handleCustomerMessage(msg);
-        } else if (msg.cmd == Command.MSG_CUSTOMER_SUPPORT) {
-            handleCustomerSupportMessage(msg);
-        } else if (msg.cmd == Command.MSG_ROOM_IM) {
+        }  else if (msg.cmd == Command.MSG_ROOM_IM) {
             handleRoomMessage(msg);
         } else if (msg.cmd == Command.MSG_SYNC_NOTIFY) {
             handleSyncNotify(msg);
@@ -1888,18 +1852,6 @@ public class IMService {
 
     }
 
-    private void publishCustomerSupportMessage(final CustomerMessage cs) {
-        runOnMainThread(new Runnable() {
-            @Override
-            public void run() {
-                for (int i = 0; i < customerServiceMessageObservers.size(); i++) {
-                    CustomerMessageObserver ob = customerServiceMessageObservers.get(i);
-                    ob.onCustomerSupportMessage(cs);
-                }
-            }
-        });
-
-    }
 
     private void publishCustomerServiceMessageACK(final CustomerMessage msg) {
         runOnMainThread(new Runnable() {
